@@ -12,7 +12,7 @@ Landing pública de LaborTrack, gestor integral de RR.HH. para obras civiles (Pr
 
 ```bash
 npm install
-cp .env.example .env   # VITE_APP_URL: URL de la app para "Iniciar sesión"
+cp .env.example .env   # VITE_APP_URL: URL de la app (por defecto https://labortrack-frontend.vercel.app)
 npm run dev
 ```
 
