@@ -255,9 +255,11 @@ export const equipo = {
     "Yanardi, Juan Cruz",
   ],
   directores: [
-    "Raúl Moralejo",
-    "Gustavo Manino",
-    "Malena Casas Castrillejo",
-    "María Teresita Cuccia",
+    "Dr. Ing. Raúl Moralejo",
+    "Lic. Gustavo Manino",
+    "Ing. Malena Casas Castrillejo",
+    "Ing. María Teresita Cuccia",
+    "Ing. Gonzalo Pozzoli",
+    "Ing. Erica Caro",
   ],
 };
