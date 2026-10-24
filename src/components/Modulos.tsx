@@ -59,13 +59,12 @@ export function Modulos() {
         });
       });
 
+      // Celular: un disparador por tarjeta, porque la lista es larga.
       mm.add(MOBILE, () => {
-        gsap.from("[data-modulo]", {
-          y: 30,
-          autoAlpha: 0,
-          stagger: 0.08,
-          duration: 0.6,
-          scrollTrigger: { trigger: "[data-pista]", start: "top 85%" },
+        gsap.utils.toArray<HTMLElement>("[data-modulo]").forEach((card) => {
+          gsap.timeline({ scrollTrigger: { trigger: card, start: "top 88%" } })
+            .from(card, { y: 50, scale: 0.94, autoAlpha: 0, duration: 0.7 })
+            .from(card.querySelector("span"), { scale: 0.4, autoAlpha: 0, duration: 0.5, ease: "back.out(2)" }, "-=0.4");
         });
       });
     },

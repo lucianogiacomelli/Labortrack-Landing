@@ -50,12 +50,17 @@ export function QueEs() {
         tl.to("[data-orbita]", { rotate: 360, duration: tl.duration(), ease: "none", transformOrigin: "50% 50%" }, 0);
       });
 
+      // Celular: las tarjetas se apilan, así que cada una entra desde su lado al llegar a ella.
       mm.add(MOBILE, () => {
-        gsap.from("[data-pilar]", {
-          y: 40,
-          autoAlpha: 0,
-          stagger: 0.15,
-          scrollTrigger: { trigger: "[data-escena]", start: "top 80%" },
+        gsap.utils.toArray<HTMLElement>("[data-pilar]").forEach((card, i) => {
+          const lado = i < 2 ? -1 : 1;
+          gsap.from(card, {
+            x: lado * 60,
+            rotate: lado * 4,
+            autoAlpha: 0,
+            duration: 0.8,
+            scrollTrigger: { trigger: card, start: "top 88%" },
+          });
         });
       });
     },

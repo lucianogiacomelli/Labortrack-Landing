@@ -1,6 +1,6 @@
 import { useRef, type MouseEvent } from "react";
 import { ArrowRight } from "lucide-react";
-import { MOTION, gsap, useGSAP } from "@/lib/gsap";
+import { DESKTOP, MOBILE, gsap, useGSAP } from "@/lib/gsap";
 import { documentacion, type RecursoDocumentacion } from "@/content/landingContent";
 import { contenedor } from "@/lib/estilos";
 import { Seccion, SectionHeading } from "./ui";
@@ -61,7 +61,8 @@ export function Documentacion() {
   useGSAP(
     () => {
       const mm = gsap.matchMedia();
-      mm.add(MOTION, () => {
+      // Escritorio: las cuatro tarjetas están en una fila y caen en cascada.
+      mm.add(DESKTOP, () => {
         gsap.timeline({ scrollTrigger: { trigger: "[data-docs]", start: "top 80%" } })
           .from("[data-doc]", {
             rotateX: -75,
@@ -74,6 +75,15 @@ export function Documentacion() {
           })
           .from("[data-doc-icono]", { scale: 0, rotate: -90, stagger: 0.12, duration: 0.6, ease: "back.out(2)" }, "-=0.8")
           .fromTo("[data-pronto]", { scale: 1 }, { scale: 1.12, yoyo: true, repeat: 1, duration: 0.25, stagger: 0.08 }, "-=0.2");
+      });
+
+      // Celular y tablet: las tarjetas se apilan, así que cada una cae al llegar a ella.
+      mm.add(MOBILE, () => {
+        gsap.utils.toArray<HTMLElement>("[data-doc]").forEach((card) => {
+          gsap.timeline({ scrollTrigger: { trigger: card, start: "top 88%" } })
+            .from(card, { rotateX: -75, y: 60, autoAlpha: 0, transformOrigin: "50% 0%", duration: 1, ease: "back.out(1.4)" })
+            .from(card.querySelector("[data-doc-icono]"), { scale: 0, rotate: -90, duration: 0.6, ease: "back.out(2)" }, "-=0.7");
+        });
       });
     },
     { scope: ref },

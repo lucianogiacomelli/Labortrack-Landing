@@ -71,7 +71,7 @@ export function Cta() {
     () => {
       const mm = gsap.matchMedia();
       mm.add(MOTION, () => {
-        const split = SplitText.create("h2", { type: "chars,words", mask: "chars" });
+        const split = SplitText.create("h2", { type: "chars,words", mask: "chars", charsClass: "split-letra" });
         gsap.timeline({ scrollTrigger: { trigger: ref.current, start: "top 70%" } })
           .from(split.chars, { yPercent: 120, stagger: 0.015, duration: 0.8, ease: "back.out(1.6)" })
           .from("[data-cta-texto]", { y: 20, autoAlpha: 0 }, "-=0.4")

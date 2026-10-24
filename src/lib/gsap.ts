@@ -1,14 +1,12 @@
 import { gsap } from "gsap";
 import { useGSAP } from "@gsap/react";
 import { DrawSVGPlugin } from "gsap/DrawSVGPlugin";
-import { MotionPathPlugin } from "gsap/MotionPathPlugin";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { SplitText } from "gsap/SplitText";
 
 gsap.registerPlugin(
   useGSAP,
   DrawSVGPlugin,
-  MotionPathPlugin,
   ScrollTrigger,
   SplitText,
 );

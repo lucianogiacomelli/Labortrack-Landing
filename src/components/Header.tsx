@@ -56,7 +56,7 @@ export function Header() {
           className="h-full origin-left bg-gradient-to-r from-accent-deep via-accent to-sunset"
         />
       </div>
-      <div className={cn(contenedor, "flex items-center justify-between gap-6 py-3")}>
+      <div className={cn(contenedor, "flex items-center justify-between gap-3 py-3 sm:gap-6")}>
         <a href="#inicio" className="flex items-center gap-3" aria-label="LaborTrack, inicio">
           <span className="flex size-10 shrink-0 items-center justify-center rounded-lg bg-primary text-white">
             <Building2 className="size-6" strokeWidth={1.75} />
@@ -81,7 +81,7 @@ export function Header() {
           ))}
         </nav>
         <div className="flex items-center gap-2">
-          <BotonLogin className="h-10 px-4" />
+          <BotonLogin className="hidden h-10 px-4 sm:inline-flex" />
           <button
             type="button"
             className="flex size-10 items-center justify-center rounded-lg text-foreground lg:hidden"
@@ -108,6 +108,9 @@ export function Header() {
                 </a>
               </li>
             ))}
+            <li className="py-3 sm:hidden">
+              <BotonLogin className="w-full" />
+            </li>
           </ul>
         </nav>
       ) : null}

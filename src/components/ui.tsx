@@ -39,7 +39,7 @@ export function SectionHeading({
       const mm = gsap.matchMedia();
       mm.add(MOTION, () => {
         const titulo = ref.current!.querySelector("h2")!;
-        const split = SplitText.create(titulo, { type: "lines", mask: "lines" });
+        const split = SplitText.create(titulo, { type: "lines", mask: "lines", linesClass: "split-linea" });
         const tl = gsap.timeline({
           scrollTrigger: { trigger: ref.current, start: "top 82%" },
         });

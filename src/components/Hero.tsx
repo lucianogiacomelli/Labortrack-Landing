@@ -1,34 +1,37 @@
 import { useRef } from "react";
 import { CircleCheck, UsersRound } from "lucide-react";
 import { cn } from "@/lib/cn";
-import { DESKTOP, MOTION, gsap, SplitText, useGSAP } from "@/lib/gsap";
+import { DESKTOP, MOBILE, MOTION, gsap, SplitText, useGSAP } from "@/lib/gsap";
 import { contenedor } from "@/lib/estilos";
 import { BotonLogin } from "./ui";
 
-const qrCeldas = [
-  [0, 0], [1, 0], [2, 0], [4, 0], [6, 0], [7, 0], [8, 0],
-  [0, 1], [2, 1], [4, 1], [5, 1], [6, 1], [8, 1],
-  [0, 2], [1, 2], [2, 2], [5, 2], [6, 2], [7, 2], [8, 2],
-  [3, 3], [5, 3], [7, 3],
-  [0, 4], [2, 4], [3, 4], [4, 4], [6, 4], [8, 4],
-  [4, 5], [5, 5], [7, 5],
-  [0, 6], [1, 6], [2, 6], [4, 6], [6, 6], [7, 6],
-  [0, 7], [2, 7], [3, 7], [5, 7], [8, 7],
-  [0, 8], [1, 8], [2, 8], [4, 8], [5, 8], [6, 8], [8, 8],
-];
+// Zigzag del reticulado: alterna entre dos líneas paralelas a lo largo de un eje.
+function reticulado(desde: number, hasta: number, paso: number, a: number, b: number, vertical: boolean) {
+  const puntos: string[] = [];
+  const pasos = Math.round(Math.abs(hasta - desde) / paso);
+  const sentido = hasta > desde ? 1 : -1;
+  for (let i = 0; i <= pasos; i++) {
+    const eje = desde + i * paso * sentido;
+    const lado = i % 2 === 0 ? a : b;
+    puntos.push(vertical ? `${lado} ${eje}` : `${eje} ${lado}`);
+  }
+  return `M${puntos.join("L")}`;
+}
 
-const cables = [
-  "M248 170c62 0 74-56 134-56h42",
-  "M248 230c70 0 78 0 136 0h40",
-  "M248 290c62 0 76 42 136 42h40",
-];
+const columnas = [390, 450, 510, 570, 630];
+const losas = [406, 342, 278, 214];
+const ventanas = losas.slice(1).flatMap((losa) =>
+  columnas.slice(0, -1).map((x) => ({ x: x + 12, y: losa + 14 })),
+);
 
-const barras = [
-  { x: 460, h: 46 },
-  { x: 494, h: 74 },
-  { x: 528, h: 60 },
-  { x: 562, h: 104, acento: true },
-  { x: 596, h: 86 },
+const obreros = [
+  { cx: 250, cy: 408 },
+  { cx: 362, cy: 408 },
+  { cx: 424, cy: 336 },
+  { cx: 548, cy: 336 },
+  { cx: 486, cy: 272 },
+  { cx: 604, cy: 272 },
+  { cx: 432, cy: 208 },
 ];
 
 function Ilustracion() {
@@ -37,57 +40,66 @@ function Ilustracion() {
       <g fill="none" strokeLinecap="round" strokeLinejoin="round">
         <path data-trazo stroke="var(--lt-border-strong)" strokeWidth="1.5" d="M26 414h648" />
 
-        {/* Celular del operario */}
-        <g data-celular>
-          <rect data-trazo stroke="var(--lt-action-primary)" strokeWidth="2.5" x="58" y="78" width="188" height="300" rx="26" fill="var(--lt-surface-card)" />
-          <path data-trazo stroke="var(--lt-action-primary)" strokeWidth="2.5" d="M136 100h32" />
-          <path data-trazo stroke="var(--lt-neutral-500)" strokeWidth="1.75" d="M88 132h70M88 148h104" />
-          <rect data-trazo stroke="var(--lt-neutral-500)" strokeWidth="1.75" x="94" y="172" width="116" height="116" rx="10" />
-          <g stroke="none" fill="var(--lt-text-primary)">
-            {qrCeldas.map(([x, y]) => (
-              <rect key={`${x}-${y}`} data-qr x={107 + x * 10} y={185 + y * 10} width="8" height="8" rx="1.5" />
-            ))}
-          </g>
-          <path data-escaneo stroke="var(--lt-orange-500)" strokeWidth="2.5" d="M100 230h104" opacity="0" />
-          <rect data-trazo stroke="var(--lt-neutral-500)" strokeWidth="1.75" x="88" y="306" width="128" height="34" rx="8" />
-          <path data-check stroke="var(--lt-orange-600)" strokeWidth="3" d="M134 323l8 8 16-16" />
+        {/* Obrador */}
+        <g data-obrador>
+          <rect data-trazo stroke="var(--lt-neutral-500)" strokeWidth="1.75" x="56" y="344" width="176" height="70" rx="6" fill="var(--lt-surface-card)" />
+          <path data-trazo stroke="var(--lt-neutral-500)" strokeWidth="1.75" d="M48 344h192" />
+          <rect data-trazo stroke="var(--lt-neutral-500)" strokeWidth="1.75" x="76" y="366" width="26" height="48" rx="2" />
+          <rect data-trazo stroke="var(--lt-neutral-500)" strokeWidth="1.75" x="124" y="362" width="40" height="22" rx="3" />
+          <rect data-trazo stroke="var(--lt-neutral-500)" strokeWidth="1.75" x="176" y="362" width="40" height="22" rx="3" />
         </g>
 
-        {/* Conexión con la oficina */}
-        {cables.map((d, i) => (
-          <path key={d} id={`cable-${i}`} data-trazo stroke="var(--lt-blue-500)" strokeWidth="1.75" d={d} />
-        ))}
-        {[114, 230, 332].map((cy) => (
-          <circle key={cy} data-nodo cx="362" cy={cy} r="5" fill="var(--lt-orange-500)" stroke="none" />
-        ))}
-        {cables.map((d) => (
-          <circle key={`pulso-${d}`} data-pulso r="4" fill="var(--lt-orange-500)" stroke="none" opacity="0" />
-        ))}
+        {/* Grúa torre */}
+        <g stroke="var(--lt-orange-500)" strokeWidth="2">
+          <path data-trazo d="M290 414V96M310 414V96" />
+          <path data-trazo strokeWidth="1.25" d={reticulado(414, 104, 31, 290, 310, true)} />
+          <path data-trazo d="M250 88h380M250 104h380" />
+          <path data-trazo strokeWidth="1.25" d={reticulado(310, 630, 20, 104, 88, false)} />
+          <path data-trazo strokeWidth="1.5" d="M256 88L300 60L560 88M290 88L300 60L310 88" />
+          <rect data-trazo x="254" y="104" width="30" height="24" rx="2" fill="var(--lt-orange-100)" />
+        </g>
+        <g data-carro>
+          <rect x="510" y="104" width="20" height="8" rx="2" fill="var(--lt-orange-600)" stroke="none" />
+          <line data-cable x1="520" y1="112" x2="520" y2="134" stroke="var(--lt-neutral-500)" strokeWidth="1.5" />
+          <g data-viga>
+            <path stroke="var(--lt-neutral-500)" strokeWidth="1.5" d="M520 134l-28 10M520 134l28 10" />
+            <rect x="484" y="144" width="72" height="8" rx="2" fill="var(--lt-action-primary)" stroke="none" />
+          </g>
+        </g>
 
-        {/* Panel de RR.HH. */}
-        <g data-panel>
-          <rect data-trazo stroke="var(--lt-action-primary)" strokeWidth="2.5" x="424" y="70" width="230" height="290" rx="16" fill="var(--lt-surface-card)" />
-          <path data-trazo stroke="var(--lt-neutral-500)" strokeWidth="1.75" d="M448 102h84" />
-          <rect data-trazo stroke="var(--lt-neutral-500)" strokeWidth="1.75" x="448" y="124" width="84" height="56" rx="8" />
-          <rect data-trazo stroke="var(--lt-neutral-500)" strokeWidth="1.75" x="546" y="124" width="84" height="56" rx="8" />
-          <path data-trazo stroke="var(--lt-neutral-500)" strokeWidth="1.75" d="M460 148h40M460 162h24" />
-          <path data-trazo stroke="var(--lt-neutral-500)" strokeWidth="1.75" d="M558 148h40M558 162h52" />
-          <path data-trazo stroke="var(--lt-border-strong)" strokeWidth="1.5" d="M448 208h182" />
+        {/* Edificio en construcción */}
+        <g data-edificio>
+          {columnas.map((x) => (
+            <path key={x} data-trazo stroke="var(--lt-action-primary)" strokeWidth="2.5" d={`M${x} 414V214`} />
+          ))}
           <g stroke="none">
-            {barras.map((barra) => (
-              <rect
-                key={barra.x}
-                data-barra
-                x={barra.x}
-                y={336 - barra.h}
-                width="22"
-                height={barra.h}
-                rx="3"
-                fill={barra.acento ? "var(--lt-action-primary)" : "var(--lt-blue-100)"}
-              />
+            {losas.map((y) => (
+              <rect key={y} data-losa x="384" y={y} width="252" height="8" rx="2" fill="var(--lt-action-primary)" />
+            ))}
+            {ventanas.map(({ x, y }) => (
+              <rect key={`${x}-${y}`} data-ventana x={x} y={y} width="36" height="34" rx="3" fill="var(--lt-blue-100)" />
             ))}
           </g>
+          <rect
+            data-proyecto
+            x="390"
+            y="160"
+            width="240"
+            height="54"
+            rx="2"
+            stroke="var(--lt-blue-500)"
+            strokeWidth="1.5"
+            strokeDasharray="6 6"
+          />
         </g>
+
+        {/* Cada punto es un operario que ya fichó su ingreso */}
+        {obreros.map(({ cx, cy }) => (
+          <g key={`${cx}-${cy}`}>
+            <circle data-anillo cx={cx} cy={cy} r="6" stroke="var(--lt-orange-500)" strokeWidth="1.5" opacity="0" />
+            <circle data-obrero cx={cx} cy={cy} r="6" fill="var(--lt-orange-500)" stroke="var(--lt-surface-card)" strokeWidth="2" />
+          </g>
+        ))}
       </g>
     </svg>
   );
@@ -101,7 +113,7 @@ export function Hero() {
       const mm = gsap.matchMedia();
 
       mm.add(MOTION, () => {
-        const split = SplitText.create("h1", { type: "words", mask: "words" });
+        const split = SplitText.create("h1", { type: "words", mask: "words", wordsClass: "split-palabra" });
         const intro = gsap.timeline({ delay: 0.15 });
 
         intro
@@ -111,37 +123,39 @@ export function Hero() {
           .from("[data-hero-texto]", { autoAlpha: 0, y: 24 }, "-=0.7")
           .from("[data-hero-acciones] > *", { autoAlpha: 0, y: 18, stagger: 0.1 }, "-=0.6")
 
-          // Ilustración: se dibuja, se escanea el QR y viaja el dato al panel.
-          .from("[data-trazo]", { drawSVG: "0%", duration: 1.1, stagger: 0.05, ease: "power2.inOut" }, 0.3)
-          .from("[data-qr]", {
+          // Ilustración: se dibuja la obra, sube piso a piso y van llegando los operarios.
+          .from("[data-trazo]", { drawSVG: "0%", duration: 1.1, stagger: 0.04, ease: "power2.inOut" }, 0.3)
+          .from("[data-carro]", { autoAlpha: 0, duration: 0.4 }, 1.2)
+          .from("[data-losa]", { scaleX: 0, transformOrigin: "left", stagger: 0.18, duration: 0.6, ease: "power2.out" }, 1.1)
+          .from("[data-ventana]", {
             scale: 0,
             transformOrigin: "center",
             duration: 0.35,
-            stagger: { each: 0.012, from: "center", grid: [9, 9] },
+            stagger: { each: 0.04, from: "start" },
             ease: "back.out(2)",
-          }, 1.1)
-          .fromTo("[data-escaneo]", { y: -48, opacity: 0 }, { y: 48, opacity: 1, duration: 0.9, ease: "power1.inOut" }, 1.7)
-          .to("[data-escaneo]", { opacity: 0, duration: 0.2 })
-          .from("[data-check]", { drawSVG: "0%", duration: 0.4 }, "<")
-          .from("[data-chip-ingreso]", { autoAlpha: 0, scale: 0.6, y: 20, duration: 0.6, ease: "back.out(1.8)" }, "<0.1")
-          .from("[data-nodo]", { scale: 0, transformOrigin: "center", stagger: 0.1, ease: "back.out(3)", duration: 0.4 }, "<")
-          .from("[data-barra]", { scaleY: 0, transformOrigin: "bottom", stagger: 0.08, duration: 0.7, ease: "back.out(1.4)" }, "<0.2")
-          .from("[data-chip-presentes]", { autoAlpha: 0, scale: 0.6, y: 20, duration: 0.6, ease: "back.out(1.8)" }, "-=0.3");
+          }, 1.5)
+          .from("[data-proyecto]", { autoAlpha: 0, duration: 0.6 }, 2)
+          .from("[data-obrero]", { scale: 0, transformOrigin: "center", stagger: 0.12, duration: 0.4, ease: "back.out(3)" }, 2.1)
+          .from("[data-chip-ingreso]", { autoAlpha: 0, scale: 0.6, y: 20, duration: 0.6, ease: "back.out(1.8)" }, 2.2)
+          .from("[data-chip-presentes]", { autoAlpha: 0, scale: 0.6, y: 20, duration: 0.6, ease: "back.out(1.8)" }, 2.9);
 
-        // Pulsos en loop por cada cable, desfasados.
-        gsap.utils.toArray<SVGCircleElement>("[data-pulso]").forEach((pulso, i) => {
-          gsap.timeline({ repeat: -1, delay: 3 + i * 0.45, repeatDelay: 1.2 })
-            .set(pulso, { opacity: 1 })
-            .to(pulso, {
-              duration: 1.2,
-              ease: "power1.inOut",
-              motionPath: { path: `#cable-${i}`, align: `#cable-${i}`, alignOrigin: [0.5, 0.5] },
-            })
-            .to(pulso, { opacity: 0, duration: 0.2 });
+        // La grúa traslada la viga sobre el piso en obra.
+        gsap.timeline({ repeat: -1, yoyo: true, delay: 3, defaults: { ease: "sine.inOut" } })
+          .to("[data-carro]", { x: -70, duration: 3.2 })
+          .to("[data-cable]", { attr: { y2: 150 }, duration: 1.6 }, "<0.8")
+          .to("[data-viga]", { y: 16, duration: 1.6 }, "<");
+
+        // Cada operario "ficha" con un pulso, desfasado del resto.
+        gsap.utils.toArray<SVGCircleElement>("[data-anillo]").forEach((anillo, i) => {
+          gsap.fromTo(
+            anillo,
+            { scale: 1, opacity: 0.8, transformOrigin: "center" },
+            { scale: 2.8, opacity: 0, duration: 1.4, ease: "power1.out", repeat: -1, repeatDelay: 2.6, delay: 3 + i * 0.55 },
+          );
         });
 
         gsap.to("[data-chip-ingreso]", { y: -8, duration: 2.2, yoyo: true, repeat: -1, ease: "sine.inOut", delay: 3 });
-        gsap.to("[data-chip-presentes]", { y: 8, duration: 2.6, yoyo: true, repeat: -1, ease: "sine.inOut", delay: 3.2 });
+        gsap.to("[data-chip-presentes]", { y: 8, duration: 2.6, yoyo: true, repeat: -1, ease: "sine.inOut", delay: 3.6 });
 
         return () => split.revert();
       });
@@ -151,8 +165,16 @@ export function Hero() {
         const salida = { trigger: ref.current, start: "top top", end: "bottom top", scrub: true };
         gsap.to("[data-hero-copy]", { yPercent: -18, autoAlpha: 0.2, ease: "none", scrollTrigger: salida });
         gsap.to("[data-hero-arte]", { y: 90, scale: 0.92, ease: "none", scrollTrigger: salida });
-        gsap.to("[data-celular]", { x: -24, ease: "none", scrollTrigger: salida });
-        gsap.to("[data-panel]", { x: 24, ease: "none", scrollTrigger: salida });
+        gsap.to("[data-obrador]", { x: -24, ease: "none", scrollTrigger: salida });
+        gsap.to("[data-edificio]", { x: 24, ease: "none", scrollTrigger: salida });
+      });
+
+      // En celular la ilustración queda debajo del texto: se separa mientras cruza la pantalla.
+      mm.add(MOBILE, () => {
+        const cruce = { trigger: "[data-hero-arte]", start: "top bottom", end: "bottom top", scrub: true };
+        gsap.fromTo("[data-hero-arte]", { scale: 0.94 }, { scale: 1.04, ease: "none", scrollTrigger: cruce });
+        gsap.fromTo("[data-obrador]", { x: 12 }, { x: -16, ease: "none", scrollTrigger: cruce });
+        gsap.fromTo("[data-edificio]", { x: -12 }, { x: 16, ease: "none", scrollTrigger: cruce });
       });
     },
     { scope: ref },
@@ -192,20 +214,20 @@ export function Hero() {
         <div
           data-hero-arte
           role="img"
-          aria-label="Un operario registra su ingreso con QR y RR.HH. lo ve en el panel"
+          aria-label="Una obra en construcción con grúa, donde cada operario registra su ingreso y RR.HH. ve cuántos están presentes"
           className="relative"
         >
           <Ilustracion />
           <div
             data-chip-ingreso
-            className="absolute left-[2%] top-[4%] flex items-center gap-2 rounded-lg border border-border bg-card px-3 py-2 text-xs font-semibold shadow-floating sm:text-sm"
+            className="absolute right-[2%] top-[1%] flex items-center gap-2 rounded-lg border border-border bg-card px-3 py-2 text-xs font-semibold shadow-floating sm:text-sm"
           >
             <CircleCheck className="size-4 text-success" aria-hidden="true" />
             Ingreso 07:58 · Obra Centro
           </div>
           <div
             data-chip-presentes
-            className="absolute bottom-[4%] right-[2%] flex items-center gap-2 rounded-lg border border-border bg-card px-3 py-2 text-xs font-semibold shadow-floating sm:text-sm"
+            className="absolute left-[2%] top-[40%] flex items-center gap-2 rounded-lg border border-border bg-card px-3 py-2 text-xs font-semibold shadow-floating sm:text-sm"
           >
             <UsersRound className="size-4 text-primary" aria-hidden="true" />
             42 de 45 presentes
