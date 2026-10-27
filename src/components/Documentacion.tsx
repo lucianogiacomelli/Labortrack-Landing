@@ -1,9 +1,11 @@
-import { useRef, type MouseEvent } from "react";
-import { ArrowRight } from "lucide-react";
+import { useRef, useState, type MouseEvent } from "react";
+import { Eye } from "lucide-react";
 import { DESKTOP, MOBILE, gsap, useGSAP } from "@/lib/gsap";
-import { documentacion, type RecursoDocumentacion } from "@/content/landingContent";
-import { contenedor } from "@/lib/estilos";
+import { documentacion, pieDiagramas, type RecursoDocumentacion } from "@/content/landingContent";
+import { cn } from "@/lib/cn";
+import { boton, contenedor } from "@/lib/estilos";
 import { Seccion, SectionHeading } from "./ui";
+import { VisorImagen, type ContenidoVisor } from "./VisorImagen";
 
 // Inclinación 3D leve siguiendo el puntero.
 function inclinar(event: MouseEvent<HTMLElement>) {
@@ -19,7 +21,13 @@ function enderezar(event: MouseEvent<HTMLElement>) {
   gsap.to(event.currentTarget, { rotateX: 0, rotateY: 0, duration: 0.6, ease: "elastic.out(1, 0.5)" });
 }
 
-function DocumentoCard({ recurso }: { recurso: RecursoDocumentacion }) {
+function DocumentoCard({
+  recurso,
+  onVer,
+}: {
+  recurso: RecursoDocumentacion;
+  onVer: (disparador: HTMLButtonElement) => void;
+}) {
   const Icono = recurso.icono;
   return (
     <article
@@ -33,30 +41,34 @@ function DocumentoCard({ recurso }: { recurso: RecursoDocumentacion }) {
       </span>
       <h3 className="mb-2 text-lg font-bold tracking-tight">{recurso.titulo}</h3>
       <p className="mb-6 flex-1 leading-relaxed text-foreground-muted">{recurso.descripcion}</p>
-      {recurso.href ? (
-        <a
-          href={recurso.href}
-          target="_blank"
-          rel="noreferrer"
-          className="inline-flex items-center gap-2 font-semibold text-primary hover:underline"
-        >
-          {recurso.accion}
-          <ArrowRight className="size-4" />
-        </a>
-      ) : (
-        <span className="flex flex-col items-start gap-2 rounded-lg border border-dashed border-border-strong px-3 py-2.5 text-sm font-semibold text-foreground-muted">
-          <span data-pronto className="rounded-full bg-accent-soft px-2 py-0.5 text-[11px] uppercase tracking-wide text-warning">
-            Próximamente
-          </span>
-          {recurso.accion}
-        </span>
-      )}
+      <button
+        type="button"
+        onClick={(e) => onVer(e.currentTarget)}
+        aria-label={recurso.accion}
+        className={cn(boton.primary, "w-full")}
+      >
+        <Eye className="size-4" />
+        Ver
+      </button>
     </article>
   );
 }
 
 export function Documentacion() {
   const ref = useRef<HTMLDivElement>(null);
+  const [abierto, setAbierto] = useState<ContenidoVisor | null>(null);
+  const disparador = useRef<HTMLButtonElement | null>(null);
+
+  function abrir(recurso: RecursoDocumentacion, elemento: HTMLButtonElement) {
+    disparador.current = elemento;
+    setAbierto({ titulo: recurso.titulo, imagenes: recurso.diagramas, pie: pieDiagramas });
+  }
+
+  // Al cerrar el visor, el foco vuelve al botón "Ver" de la tarjeta que lo abrió.
+  function cerrar() {
+    setAbierto(null);
+    disparador.current?.focus();
+  }
 
   useGSAP(
     () => {
@@ -73,8 +85,7 @@ export function Documentacion() {
             duration: 1,
             ease: "back.out(1.4)",
           })
-          .from("[data-doc-icono]", { scale: 0, rotate: -90, stagger: 0.12, duration: 0.6, ease: "back.out(2)" }, "-=0.8")
-          .fromTo("[data-pronto]", { scale: 1 }, { scale: 1.12, yoyo: true, repeat: 1, duration: 0.25, stagger: 0.08 }, "-=0.2");
+          .from("[data-doc-icono]", { scale: 0, rotate: -90, stagger: 0.12, duration: 0.6, ease: "back.out(2)" }, "-=0.8");
       });
 
       // Celular y tablet: las tarjetas se apilan, así que cada una cae al llegar a ella.
@@ -100,10 +111,11 @@ export function Documentacion() {
         />
         <div data-docs className="mt-10 grid gap-6 [perspective:1200px] sm:grid-cols-2 lg:grid-cols-4">
           {documentacion.map((recurso) => (
-            <DocumentoCard key={recurso.titulo} recurso={recurso} />
+            <DocumentoCard key={recurso.titulo} recurso={recurso} onVer={(elemento) => abrir(recurso, elemento)} />
           ))}
         </div>
       </div>
+      <VisorImagen contenido={abierto} onCerrar={cerrar} />
     </Seccion>
   );
 }

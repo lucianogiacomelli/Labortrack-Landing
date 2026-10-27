@@ -22,8 +22,23 @@ npm run dev
 
 Todos los textos y datos están en `src/content/landingContent.ts`, tomados del documento de Factibilidad y Diseño.
 
-- **Documentación técnica:** cada recurso sin `href` se muestra como "Próximamente". Para publicar un diagrama, agregar el archivo en `public/` y completar `href`.
-- **Pantallas:** cada pantalla sin `src` muestra un marcador. Para usar una captura, agregar la imagen en `public/` y completar `src`.
+- **Documentación técnica:** cada tarjeta tiene un botón "Ver" que abre sus `diagramas` en el visor. Para publicar un diagrama nuevo (en una tarjeta existente o en una nueva entrada de `documentacion`):
+  1. Copiar el `.png` en `public/diagramas/` y generar su `.webp` (ver abajo). Los diagramas no tienen PDF.
+  2. Agregar una entrada en `diagramas` con `id`, `etiqueta` (nombre de la pestaña), `imagen` (ruta sin extensión), `ancho` y `alto` reales del PNG y un `alt` escrito mirando la imagen.
+
+  La tarjeta abre el visor (`VisorImagen`) con zoom, arrastre y, si hay más de un diagrama, pestañas. El pie del visor sale de `pieDiagramas`.
+- **Pantallas:** cada pantalla sin `captura` muestra un marcador. Para usar una captura, copiar el `.png` en `public/capturas/`, generar su `.webp` y completar `captura` con los mismos campos que un diagrama. El orden del arreglo arma las filas de la galería: una captura de escritorio junto a una de celular, o dos de escritorio juntas.
+
+### Regenerar los WebP
+
+Las imágenes se sirven en WebP, con el PNG como respaldo dentro de `<picture>`. Después de agregar o reemplazar un PNG (con el mismo nombre de archivo), regenerar los WebP de la carpeta:
+
+```bash
+python scripts/webp.py public/capturas
+python scripts/webp.py public/diagramas
+```
+
+El script necesita Pillow (`pip install pillow`), que no es dependencia del proyecto. No modifica los PNG: para cada uno escribe el `.webp` más chico entre calidad 90 y sin pérdida. Si cambian las dimensiones de una imagen, actualizar `ancho` y `alto` en `landingContent.ts`.
 
 ## Animaciones
 

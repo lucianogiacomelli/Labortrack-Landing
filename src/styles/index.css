@@ -45,3 +45,27 @@
     scroll-behavior: smooth;
   }
 }
+
+/* Visor de imágenes: entrada suave solo si el usuario no pidió reducir el movimiento. */
+@media (prefers-reduced-motion: no-preference) {
+  .visor-imagen[open] {
+    animation: visor-entrada 200ms ease-out;
+  }
+
+  .visor-imagen[open]::backdrop {
+    animation: visor-fondo 200ms ease-out;
+  }
+}
+
+@keyframes visor-entrada {
+  from {
+    opacity: 0;
+    transform: scale(0.98);
+  }
+}
+
+@keyframes visor-fondo {
+  from {
+    opacity: 0;
+  }
+}
